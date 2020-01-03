@@ -1,56 +1,105 @@
-import React from 'react'
-import Link from 'next/link'
+import React, { useState } from 'react'
+import { auth, firebase } from '../lib'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@material-ui/core'
 
-const links = [
-  { href: 'https://zeit.co/now', label: 'ZEIT' },
-  { href: 'https://github.com/zeit/next.js', label: 'GitHub' },
-].map(link => {
-  link.key = `nav-link-${link.href}-${link.label}`
-  return link
-})
+const Nav = (props) => {
+  const { onAuth, user } = props;
+  const [dialog, setDialog] = useState(null);
 
-const Nav = () => (
-  <nav>
-    <ul>
-      <li>
-        <Link href="/">
-          <a>Home</a>
-        </Link>
-      </li>
-      {links.map(({ key, href, label }) => (
-        <li key={key}>
-          <a href={href}>{label}</a>
-        </li>
-      ))}
-    </ul>
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-    <style jsx>{`
-      :global(body) {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, Avenir Next, Avenir,
-          Helvetica, sans-serif;
-      }
-      nav {
-        text-align: center;
-      }
-      ul {
-        display: flex;
-        justify-content: space-between;
-      }
-      nav > ul {
-        padding: 4px 16px;
-      }
-      li {
-        display: flex;
-        padding: 6px 8px;
-      }
-      a {
-        color: #067df7;
-        text-decoration: none;
-        font-size: 13px;
-      }
-    `}</style>
-  </nav>
-)
+  const handleDialogClose = () => {
+    setDialog(null);
+  };
+
+  const handleLogout = () => {
+    setDialog(null);
+    onAuth(false);
+  };
+
+  const handleDialogAbout = () => {
+    setDialog({
+      title: 'About',
+      text: '...',
+    });
+  };
+
+  const handleDialogUser = () => {
+    if (!!user) {
+      console.log(user);
+      setDialog({
+        title: user.email,
+        text: 'You have read ${} books so far this year!',
+        isUser: true,
+      });
+    }
+  };
+
+  return (
+    <>
+      <nav>
+        <ul>
+          <li>
+            {!!user ? (
+              <Button color="secondary" size="small" variant="outlined" onClick={handleDialogUser}>Profile</Button>
+            ) : (
+              <Button color="secondary" size="small" variant="outlined" onClick={onAuth}>Register / Login</Button>
+            )}
+          </li>
+          {!!user && (
+            <li>
+              [search] -- [x]
+            </li>
+          )}
+          <li>
+            <Button color="secondary" size="small" variant="outlined" onClick={handleDialogAbout}>About</Button>
+          </li>
+        </ul>
+
+        <style jsx>{`
+          ul {
+            display: flex;
+            justify-content: space-between;
+          }
+          nav > ul {
+            padding: 4px 16px;
+          }
+          li {
+            display: flex;
+            padding: 6px 8px;
+          }
+        `}</style>
+      </nav>
+
+      {!!dialog && (
+        <Dialog
+          fullScreen={fullScreen}
+          open={true}
+          onClose={handleDialogClose}
+        >
+          <DialogContent>
+            <Typography variant="subtitle1">{dialog.title}</Typography>
+            <Typography variant="body1">{dialog.text}</Typography>
+          </DialogContent>
+          <DialogActions>
+            {!!dialog.isUser && <Button size="small" onClick={handleLogout}>Sign Out</Button>}
+            <Button onClick={handleDialogClose} color="secondary" autoFocus>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+    </>
+  )
+}
 
 export default Nav

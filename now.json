@@ -1,0 +1,24 @@
+{
+  "name": "2020-vt-crc",
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@now/next"
+    }
+  ],
+  "env": {
+    "NEXT_APIKEY": "@next-apikey",
+    "NEXT_MESSAGINGSENDERID": "@next-messagingsenderid",
+    "NEXT_APPID": "@next-appid",
+    "NEXT_MEASUREMENTID": "@next-measurementid"
+  },
+  "build": {
+    "env": {
+      "NEXT_APIKEY": "@next-apikey",
+      "NEXT_MESSAGINGSENDERID": "@next-messagingsenderid",
+      "NEXT_APPID": "@next-appid",
+      "NEXT_MEASUREMENTID": "@next-measurementid"
+    }
+  }
+}

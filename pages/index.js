@@ -1,72 +1,120 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { auth, firebase }from '../lib'
 import Head from 'next/head'
+
+import { Button, Typography, CircularProgress } from '@material-ui/core'
+import Dialog from '../components/dialog'
+import List from '../components/list'
 import Nav from '../components/nav'
-import ListBooks from '../components/list'
 
-const Home = () => (
-  <div>
-    <Head>
-      <title>Home</title>
-      <link rel="icon" href="/favicon.ico" />
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-    </Head>
+const defaultState = {
+  "0": {
+    "title": "12345",
+    "complete": true,
+  },
+  "2": {
+    "title": "asdf",
+    "complete": true,
+  },
+  "5": {
+    "title": "qwerty",
+    "complete": false,
+  },
+};
 
-    <Nav />
+const Home = () => {
+  const [user, setUser] = useState(null);
+  const [books, setBooks] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [dialogContents, setDialogContents] = useState(null);
 
-    <div className="hero">
-      <h1 className="title">Welcome to Next.js!</h1>
-      <ListBooks />
+  const handleAuth = async (login = true) => {
+    setLoading(true);
+    if (!login) {
+      return await auth(false);
+    }
+    await auth();
+    return;
+  };
+
+  const handleClose = () => {
+    setDialogContents(null);
+  };
+
+  const handleUpdate = () => {
+    console.log('updating books...?');
+  };
+
+  const handleEdit = (id, title) => {
+    setDialogContents({
+      book: '',
+      title,
+    })
+  }
+
+  firebase.auth().onAuthStateChanged(fbUser => {
+    if (fbUser) {
+      setUser(fbUser);
+      handleUpdate();
+      setLoading(false);
+    } else {
+      setUser(null);
+      setLoading(false);
+    }
+  });
+
+  return (
+    <div>
+      <Head>
+        <title>Home</title>
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+      </Head>
+
+      <Nav onAuth={handleAuth} user={user} />
+
+      {loading ? (
+        <CircularProgress color="secondary" />
+      ) : !!user ? (
+        <List onEdit={handleEdit} userData={defaultState} />
+      ) : (
+        <main>
+          <p>Welcome to the (unofficial) digital tracking tool for the 2020 Christian Reading Challenge published by <a href="https://www.challies.com/visual-theology/the-2020-christian-reading-challenge/" title="VT CRC Information" target="_blank">Visual Theology</a>.</p>
+          <p>Authenticate with your Google account to track your progress throughout the year!</p>
+        </main>
+      )}
+
+      {!!dialogContents && dialogContents.book !== '' && (
+        <Dialog
+          title={dialogContents.title}
+          input={dialogContents.book}
+          onClose={handleClose}
+          onUpdate={handleUpdate}
+        />
+      )}
+
+      <style jsx global>{`
+        body {
+          margin: 0 0 30px;
+          padding: 0;
+          background: #eee url('https://www.toptal.com/designers/subtlepatterns/patterns/white_wall_hash.png');
+        }
+        main {
+          width: 90%;
+          max-width: 500px;
+          margin: 0 auto;
+          color: #333;
+          font-size: 1.4em;
+          font-weight: 300;
+          line-height: 1.5;
+          text-align: center;
+        }
+        a {
+          color:
+        }
+      `}</style>
     </div>
-
-    <style jsx>{`
-      .hero {
-        width: 100%;
-        max-width: 500px;
-        margin: 0 auto;
-        color: #333;
-      }
-      .title {
-        margin: 0;
-        width: 100%;
-        padding-top: 80px;
-        line-height: 1.15;
-        font-size: 48px;
-      }
-      .title,
-      .description {
-        text-align: center;
-      }
-      .row {
-        max-width: 880px;
-        margin: 80px auto 40px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-around;
-      }
-      .card {
-        padding: 18px 18px 24px;
-        width: 220px;
-        text-align: left;
-        text-decoration: none;
-        color: #434343;
-        border: 1px solid #9b9b9b;
-      }
-      .card:hover {
-        border-color: #067df7;
-      }
-      .card h3 {
-        margin: 0;
-        color: #067df7;
-        font-size: 18px;
-      }
-      .card p {
-        margin: 0;
-        padding: 12px 0 0;
-        font-size: 13px;
-        color: #333;
-      }
-    `}</style>
-  </div>
-)
+  )
+}
 
 export default Home

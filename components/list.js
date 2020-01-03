@@ -2,81 +2,138 @@ import React, { useState } from 'react'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import {
   Checkbox,
-  List,
+  List as MUIList,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
+  Paper,
+  useTheme,
 } from '@material-ui/core';
+
+import bookLists from './list-src.json';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
     root: {
+      position: 'relative',
+      // top: '5vh',
       width: '100%',
-      maxHeight: 300,
+      maxWidth: '500px',
+      // height: '85vh',
+      margin: '0 auto',
       padding: 0,
-      backgroundColor: theme.palette.background.paper,
       overflow: 'auto',
       '& ul': {
         padding: 0,
         listStyleType: 'none',
       },
     },
-    subheader: {
-      backgroundColor: theme.palette.background.paper,
+    subList: {
+      paddingTop: 10,
+      paddingBottom: 10,
     },
-  }),
+    subheader: {
+      paddingTop: 10,
+      paddingBottom: 10,
+      backgroundColor: theme.palette.secondary.light,
+      color: theme.palette.background.paper,
+      fontSize: 14,
+      lineHeight: 1.5,
+      '& div': {
+        fontSize: 12,
+      },
+    },
+  })
 );
 
-const ListBooks = () => {
+const List = props => {
+  const { onEdit, userData } = props;
+  const theme = useTheme();
   const classes = useStyles();
-  const [checked, setChecked] = useState([1]);
 
-  const handleToggle = (value) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-    setChecked(newChecked);
+  let bookNum = 0;
+
+  // const [userBooks, setUserBooks] = useState(userData);
+
+  const findBook = (list, item) => {
+  //   const book = userBooks[list][item];
+  //   return (!!book && !!book.title) ? book.title : '';
+  }
+
+  const findChecked = (list, item) => {
+  //   const book = userBooks[list][item];
+  //   return !!book && !!book.complete;
+  }
+
+  const handleToggle = (list, item) => () => {
+  //   const isChecked = findChecked(list, item);
+  //   const val = item.toString();
+  //   const newChecked = [...checked];
+  //   if (isChecked) {
+  //     newChecked[list] = newChecked[list].filter(e => e !== val);
+  //   } else {
+  //     newChecked[list].push(val);
+  //   }
+  //   setUserBooks(newChecked);
   };
 
-  const handleText = (value) => {
-    console.log(value);
+  const handleText = (listNum, itemNum) => {
+    // setDialogContents([listNum, itemNum]);
+  }
+
+  const handleClose = () => {
+    // setDialogContents([]);
   }
 
   return (
-    <List dense className={classes.root}>
-      {[0, 1, 2, 3].map(section => {
-        const items = [0, 1, 2, 3].map(value => {
-          const labelId = `checkbox-list-secondary-label-${value}`;
+    <Paper elevation={5} className={classes.root}>
+      <MUIList dense>
+        {bookLists.map((list, listNum) => {
           return (
-            <ListItem key={value} button onClick={handleText}>
-              <ListItemText id={labelId} primary={`Line item ${value + 1}`} />
-              <ListItemSecondaryAction className={classes.ul}>
-                <Checkbox
-                  edge="end"
-                  onChange={handleToggle(value)}
-                  checked={checked.indexOf(value) !== -1}
-                  inputProps={{ 'aria-labelledby': labelId }}
-                />
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })
-        return (
-          <li key={section}>
-            <ul>
-              <ListSubheader className={classes.subheader}>{`I'm sticky ${section}`}</ListSubheader>
-              { items }
-            </ul>
-          </li>
-        )
-      })}
-    </List>
+            <li key={`${list.title}-${listNum}`}>
+              <ul>
+                <ListSubheader className={classes.subheader}>
+                  {list.title}
+                  <div>{list.desc}</div>
+                </ListSubheader>
+                <div className={classes.subList}>
+                  {list.items.map(item => {
+                    const bookNumThis = bookNum;
+                    const userHasBook = !!userData[bookNumThis];
+                    bookNum++;
+                    return (
+                      <ListItem key={`book-${bookNumThis}`} button onClick={() => onEdit(bookNumThis, item)}>
+                        <ListItemText
+                          primary={!!userHasBook && userData[bookNumThis].title}
+                          primaryTypographyProps={{
+                            variant: 'subtitle2'
+                          }}
+                          secondary={item}
+                          secondaryTypographyProps={{
+                            display: 'block',
+                            variant: 'caption',
+                          }}
+                        />
+                        <ListItemSecondaryAction className={classes.ul}>
+                          <Checkbox
+                            disabled={!userHasBook || !!userHasBook && !userData[bookNumThis].title}
+                            edge="end"
+                          // onChange={handleToggle(listNum, itemNum)}
+                          // checked={findChecked(listNum, itemNum)}
+                          />
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    )
+                  })}
+                </div>
+              </ul>
+            </li>
+          )
+        })}
+      </MUIList>
+    </Paper>
   );
 }
 
-export default ListBooks
+export default List
