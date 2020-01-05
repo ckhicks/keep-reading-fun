@@ -5,25 +5,22 @@ import {
   Dialog as MUIDialog,
   DialogActions,
   DialogContent,
-  Input,
+  TextField,
   Typography,
   useMediaQuery,
   useTheme,
 } from '@material-ui/core';
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
-    root: {}
-  }),
-);
-
 const Dialog = (props) => {
-  const { title, input, onClose, onUpdate } = props;
+  const { input, name, onClose, onUpdate } = props;
   const theme = useTheme();
-  const classes = useStyles();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [text, setText] = useState(book);
+  const [text, setText] = useState(input);
+
+  const handleChange = (event) => {
+    setText(event.target.value);
+  };
 
   return (
     <MUIDialog
@@ -32,15 +29,15 @@ const Dialog = (props) => {
       onClose={onClose}
     >
       <DialogContent>
-        <Typography variant="h6">{category}</Typography>
+        <Typography variant="h6">{name}</Typography>
         <br />
-        <Input fullWidth onChange={setText} value={text} />
+        <TextField fullWidth onChange={handleChange} value={text} />
       </DialogContent>
       <DialogActions>
         <Button autoFocus onClick={onClose} color="default">
           Cancel
         </Button>
-        <Button onClick={onUpdate} color="secondary" autoFocus>
+        <Button onClick={() => onUpdate(text)} color="secondary" autoFocus>
           Update
         </Button>
       </DialogActions>

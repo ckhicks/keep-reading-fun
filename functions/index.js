@@ -14,11 +14,3 @@ exports.createUserRecord = functions.auth.user().onCreate(user => {
     .doc(user.uid)
     .set(data, { merge: true });
 });
-
-// exports.editUserBook = functions.https.onRequest(async (req, res) => {
-//   db
-//     .collection("users")
-//     .doc(req.user/books)
-//     .update();
-//   return true;
-// });

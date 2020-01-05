@@ -8,19 +8,14 @@ import {
   ListItemText,
   ListSubheader,
   Paper,
-  useTheme,
 } from '@material-ui/core';
-
-import bookLists from './list-src.json';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
     root: {
       position: 'relative',
-      // top: '5vh',
       width: '100%',
       maxWidth: '500px',
-      // height: '85vh',
       margin: '0 auto',
       padding: 0,
       overflow: 'auto',
@@ -48,48 +43,15 @@ const useStyles = makeStyles((theme) =>
 );
 
 const List = props => {
-  const { onEdit, userData } = props;
-  const theme = useTheme();
+  const { defaultList, onCheck, onEdit, userData } = props;
   const classes = useStyles();
 
   let bookNum = 0;
 
-  // const [userBooks, setUserBooks] = useState(userData);
-
-  const findBook = (list, item) => {
-  //   const book = userBooks[list][item];
-  //   return (!!book && !!book.title) ? book.title : '';
-  }
-
-  const findChecked = (list, item) => {
-  //   const book = userBooks[list][item];
-  //   return !!book && !!book.complete;
-  }
-
-  const handleToggle = (list, item) => () => {
-  //   const isChecked = findChecked(list, item);
-  //   const val = item.toString();
-  //   const newChecked = [...checked];
-  //   if (isChecked) {
-  //     newChecked[list] = newChecked[list].filter(e => e !== val);
-  //   } else {
-  //     newChecked[list].push(val);
-  //   }
-  //   setUserBooks(newChecked);
-  };
-
-  const handleText = (listNum, itemNum) => {
-    // setDialogContents([listNum, itemNum]);
-  }
-
-  const handleClose = () => {
-    // setDialogContents([]);
-  }
-
   return (
     <Paper elevation={5} className={classes.root}>
       <MUIList dense>
-        {bookLists.map((list, listNum) => {
+        {!!defaultList && defaultList.map((list, listNum) => {
           return (
             <li key={`${list.title}-${listNum}`}>
               <ul>
@@ -100,12 +62,14 @@ const List = props => {
                 <div className={classes.subList}>
                   {list.items.map(item => {
                     const bookNumThis = bookNum;
-                    const userHasBook = !!userData[bookNumThis];
+                    const userHasBook = !!userData && !!userData[bookNumThis];
+                    const userBookTitle = !!userHasBook ? userData[bookNumThis].title : '';
+                    const isChecked = !!userHasBook && !!userData[bookNumThis].checked;
                     bookNum++;
                     return (
-                      <ListItem key={`book-${bookNumThis}`} button onClick={() => onEdit(bookNumThis, item)}>
+                      <ListItem key={`book-${bookNumThis}`} button onClick={() => onEdit(bookNumThis, item, { title: userBookTitle, checked: userBookTitle === '' ? false : isChecked })}>
                         <ListItemText
-                          primary={!!userHasBook && userData[bookNumThis].title}
+                          primary={userBookTitle}
                           primaryTypographyProps={{
                             variant: 'subtitle2'
                           }}
@@ -119,8 +83,8 @@ const List = props => {
                           <Checkbox
                             disabled={!userHasBook || !!userHasBook && !userData[bookNumThis].title}
                             edge="end"
-                          // onChange={handleToggle(listNum, itemNum)}
-                          // checked={findChecked(listNum, itemNum)}
+                            onChange={() => onCheck({ id: bookNumThis, title: userBookTitle, checked: !isChecked })}
+                            checked={isChecked}
                           />
                         </ListItemSecondaryAction>
                       </ListItem>

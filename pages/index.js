@@ -1,39 +1,41 @@
 import React, { useState } from 'react'
-import { auth, firebase }from '../lib'
+import { auth, fetchBooks, firebase, setBook }from '../lib'
 import Head from 'next/head'
 
-import { Button, Typography, CircularProgress } from '@material-ui/core'
+import { Button, CircularProgress, Typography } from '@material-ui/core'
 import Dialog from '../components/dialog'
 import List from '../components/list'
 import Nav from '../components/nav'
 
-const defaultState = {
-  "0": {
-    "title": "12345",
-    "complete": true,
-  },
-  "2": {
-    "title": "asdf",
-    "complete": true,
-  },
-  "5": {
-    "title": "qwerty",
-    "complete": false,
-  },
-};
+import defaultList from '../list.json';
 
 const Home = () => {
   const [user, setUser] = useState(null);
   const [books, setBooks] = useState(null);
+  const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [dialogContents, setDialogContents] = useState(null);
 
+  const updateList = async (uid = null) => {
+    if (!!uid) {
+      const bookRes = await fetchBooks(uid);
+      if (!!bookRes) {
+        console.log(bookRes);
+        // const count = bookRes.filter(book => !!book.completed && book.title !== '').length;
+        // console.log(count);
+        // setCount(count);
+      }
+      setBooks(bookRes);
+    }
+    return;
+  }
+
   const handleAuth = async (login = true) => {
     setLoading(true);
-    if (!login) {
-      return await auth(false);
-    }
-    await auth();
+    const fbUser = await auth(login);
+    setUser(!!fbUser ? fbUser : null);
+    await updateList(fbUser.uid);
+    setLoading(false);
     return;
   };
 
@@ -41,27 +43,32 @@ const Home = () => {
     setDialogContents(null);
   };
 
-  const handleUpdate = () => {
-    console.log('updating books...?');
+  const handleCheck = async book => {
+    if (!!user) {
+      await setBook(user.uid, {[book.id]: { title: book.title, checked: book.checked }})
+      await updateList(user.uid);
+    }
+    return;
   };
 
-  const handleEdit = (id, title) => {
-    setDialogContents({
-      book: '',
-      title,
-    })
-  }
-
-  firebase.auth().onAuthStateChanged(fbUser => {
-    if (fbUser) {
-      setUser(fbUser);
-      handleUpdate();
-      setLoading(false);
-    } else {
-      setUser(null);
-      setLoading(false);
+  const handleUpdate = async title => {
+    if (!!user) {
+      const newBook = { [dialogContents.id]: { title, checked: title === '' ? false : dialogContents.checked } };
+      await setBook(user.uid, newBook)
+      await updateList(user.uid);
+      handleClose();
     }
-  });
+    return;
+  };
+
+  const handleEdit = (id, name, book) => {
+    setDialogContents({
+      checked: book.checked,
+      id,
+      name,
+      title: book.title,
+    });
+  };
 
   return (
     <div>
@@ -71,23 +78,32 @@ const Home = () => {
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       </Head>
 
-      <Nav onAuth={handleAuth} user={user} />
+      <Nav count={count} onAuth={handleAuth} user={user} />
 
       {loading ? (
-        <CircularProgress color="secondary" />
+        <main><CircularProgress color="secondary" /></main>
       ) : !!user ? (
-        <List onEdit={handleEdit} userData={defaultState} />
+        <List
+          defaultList={defaultList}
+          onCheck={handleCheck}
+          onEdit={handleEdit}
+          userData={books}
+        />
       ) : (
         <main>
-          <p>Welcome to the (unofficial) digital tracking tool for the 2020 Christian Reading Challenge published by <a href="https://www.challies.com/visual-theology/the-2020-christian-reading-challenge/" title="VT CRC Information" target="_blank">Visual Theology</a>.</p>
-          <p>Authenticate with your Google account to track your progress throughout the year!</p>
+          <Typography variant="h6">Welcome to the (unofficial) digital tracking tool for the 2020 Christian Reading Challenge</Typography>
+          <Typography variant="subtitle1">Read more at <a href="https://www.challies.com/visual-theology/the-2020-christian-reading-challenge/" title="VT CRC Information" target="_blank">Visual Theology</a>.</Typography>
+          <br />
+          <Typography>Authenticate with your Google account to track your progress throughout the year!</Typography>
+          <br />
+          <Button color="secondary" size="small" variant="contained" onClick={handleAuth}>Register / Login</Button>
         </main>
       )}
 
       {!!dialogContents && dialogContents.book !== '' && (
         <Dialog
-          title={dialogContents.title}
-          input={dialogContents.book}
+          name={dialogContents.name}
+          input={dialogContents.title}
           onClose={handleClose}
           onUpdate={handleUpdate}
         />
@@ -97,7 +113,7 @@ const Home = () => {
         body {
           margin: 0 0 30px;
           padding: 0;
-          background: #eee url('https://www.toptal.com/designers/subtlepatterns/patterns/white_wall_hash.png');
+          background: #eee url('/bg.png');
         }
         main {
           width: 90%;

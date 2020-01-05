@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { auth, firebase } from '../lib'
+import { count } from '../lib'
+
 import {
   Button,
   Dialog,
@@ -11,7 +12,7 @@ import {
 } from '@material-ui/core'
 
 const Nav = (props) => {
-  const { onAuth, user } = props;
+  const { count, onAuth, user } = props;
   const [dialog, setDialog] = useState(null);
 
   const theme = useTheme();
@@ -26,20 +27,11 @@ const Nav = (props) => {
     onAuth(false);
   };
 
-  const handleDialogAbout = () => {
-    setDialog({
-      title: 'About',
-      text: '...',
-    });
-  };
-
   const handleDialogUser = () => {
     if (!!user) {
-      console.log(user);
       setDialog({
-        title: user.email,
-        text: 'You have read ${} books so far this year!',
-        isUser: true,
+        title: 'Profile',
+        text: user.email,
       });
     }
   };
@@ -49,29 +41,25 @@ const Nav = (props) => {
       <nav>
         <ul>
           <li>
-            {!!user ? (
+            {!!user && (
               <Button color="secondary" size="small" variant="outlined" onClick={handleDialogUser}>Profile</Button>
-            ) : (
-              <Button color="secondary" size="small" variant="outlined" onClick={onAuth}>Register / Login</Button>
             )}
           </li>
-          {!!user && (
+          {!!user && count > 0 && (
             <li>
-              [search] -- [x]
+              <Typography color="secondary" variant="body2">{count} Completed</Typography>
             </li>
           )}
-          <li>
-            <Button color="secondary" size="small" variant="outlined" onClick={handleDialogAbout}>About</Button>
-          </li>
         </ul>
 
         <style jsx>{`
           ul {
             display: flex;
+            align-items: center;
             justify-content: space-between;
           }
           nav > ul {
-            padding: 4px 16px;
+            padding: 4px 8px;
           }
           li {
             display: flex;
@@ -87,11 +75,11 @@ const Nav = (props) => {
           onClose={handleDialogClose}
         >
           <DialogContent>
-            <Typography variant="subtitle1">{dialog.title}</Typography>
-            <Typography variant="body1">{dialog.text}</Typography>
+            <Typography variant="h6">{dialog.title}</Typography>
+            <Typography>{dialog.text}</Typography>
           </DialogContent>
           <DialogActions>
-            {!!dialog.isUser && <Button size="small" onClick={handleLogout}>Sign Out</Button>}
+            <Button size="small" onClick={handleLogout}>Sign Out</Button>
             <Button onClick={handleDialogClose} color="secondary" autoFocus>
               Close
             </Button>
