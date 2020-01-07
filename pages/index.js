@@ -20,12 +20,14 @@ const Home = () => {
     if (!!uid) {
       const bookRes = await fetchBooks(uid);
       let total = count;
+      console.log(bookRes);
       for (let [key, value] of Object.entries(bookRes)) {
-        if (!!value.completed && value.title !== '') {
+        if (!!value.checked && value.title !== '') {
           total++;
         }
       }
-      setCount(count);
+      console.log(total);
+      setCount(total);
       setBooks(bookRes);
     }
     return;
