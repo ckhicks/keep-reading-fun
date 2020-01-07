@@ -19,8 +19,8 @@ const Home = () => {
   const updateList = async (uid = null) => {
     if (!!uid) {
       const bookRes = await fetchBooks(uid);
+      console.log(bookRes);
       if (!!bookRes) {
-        console.log(bookRes);
         // const count = bookRes.filter(book => !!book.completed && book.title !== '').length;
         // console.log(count);
         // setCount(count);
@@ -73,9 +73,10 @@ const Home = () => {
   return (
     <div>
       <Head>
-        <title>Home</title>
+        <title>Keep Reading Fun!</title>
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+        <meta type="description" content="The (unofficial) digital tracking tool for the 2020 Christian Reading Challenge by Visual Theology." />
       </Head>
 
       <Nav count={count} onAuth={handleAuth} user={user} />
