@@ -19,12 +19,13 @@ const Home = () => {
   const updateList = async (uid = null) => {
     if (!!uid) {
       const bookRes = await fetchBooks(uid);
-      console.log(bookRes);
-      if (!!bookRes) {
-        // const count = bookRes.filter(book => !!book.completed && book.title !== '').length;
-        // console.log(count);
-        // setCount(count);
+      let total = count;
+      for (let [key, value] of Object.entries(bookRes)) {
+        if (!!value.completed && value.title !== '') {
+          total++;
+        }
       }
+      setCount(count);
       setBooks(bookRes);
     }
     return;
