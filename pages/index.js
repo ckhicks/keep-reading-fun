@@ -20,8 +20,7 @@ const Home = () => {
     if (!!uid) {
       const bookRes = await fetchBooks(uid);
       const total = Object.entries(bookRes).filter(i => i[1].checked && i[1].title !== '');
-      console.log(bookRes, total);
-      setCount(total);
+      setCount(total.length);
       setBooks(bookRes);
     }
     return;
