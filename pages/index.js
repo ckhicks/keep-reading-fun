@@ -19,15 +19,17 @@ const Home = () => {
   const updateList = async (uid = null) => {
     if (!!uid) {
       const bookRes = await fetchBooks(uid);
-      let total = count;
-      console.log(bookRes);
-      for (let [key, value] of Object.entries(bookRes)) {
-        if (!!value.checked && value.title !== '') {
-          total++;
-        }
-      }
+//       let total = count;
+      const total = Object.entries(bookRes).filter(b => !!b.checked && b.title !== '');
       console.log(total);
-      setCount(total);
+//       console.log(bookRes);
+//       for (let [key, value] of Object.entries(bookRes)) {
+//         if (!!value.checked && value.title !== '') {
+//           total++;
+//         }
+//       }
+//       console.log(total);
+      setCount(total.length);
       setBooks(bookRes);
     }
     return;
